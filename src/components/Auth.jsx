@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { GoogleIcon } from './Icons';
 
 export default function Auth() {
   const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+
+  // Supabase redirects back here with ?error=...&error_description=... if the OAuth flow itself failed.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search || window.location.hash.replace('#', '?'));
+    const desc = params.get('error_description');
+    if (desc) setError(decodeURIComponent(desc.replace(/\+/g, ' ')));
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,6 +41,20 @@ export default function Auth() {
     }
   }
 
+  async function handleGoogle() {
+    setGoogleLoading(true);
+    setError('');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) {
+      setError(error.message);
+      setGoogleLoading(false);
+    }
+    // On success the browser navigates away to Google, then back — no further action needed here.
+  }
+
   return (
     <div className="centered-screen">
       <div className="auth-card">
@@ -39,6 +62,23 @@ export default function Auth() {
         <div style={{ fontSize: 15, color: 'var(--label-2)', marginBottom: 20 }}>
           {mode === 'signin' ? 'Sign in to your tracker' : 'Create your account'}
         </div>
+
+        <button
+          type="button"
+          className="google-btn"
+          onClick={handleGoogle}
+          disabled={googleLoading}
+        >
+          <GoogleIcon />
+          {googleLoading ? 'Redirecting…' : 'Continue with Google'}
+        </button>
+
+        <div className="divider">
+          <span />
+          <em>or</em>
+          <span />
+        </div>
+
         <form onSubmit={handleSubmit}>
           <input
             className="text-field"
