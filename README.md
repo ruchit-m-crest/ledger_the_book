@@ -67,6 +67,25 @@ Any time you push new commits to `main`, Vercel redeploys automatically.
 3. Tap the **Share** button → **Add to Home Screen**.
 4. Launch it from the home screen icon — it opens full-screen, like a real app, with its own icon.
 
+## 6. Enable "Continue with Google" (optional)
+
+The app already has a Google sign-in button — it just needs OAuth credentials before it'll work.
+
+**Google Cloud Console:**
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → create a project (any name, e.g. "Ledger").
+2. **APIs & Services → OAuth consent screen** → User type **External** → fill in an app name, your email as support/developer contact → Save.
+3. **APIs & Services → Credentials → Create Credentials → OAuth client ID** → Application type **Web application**.
+4. Add:
+   - **Authorized JavaScript origins**: `http://localhost:5173` and your Vercel URL.
+   - **Authorized redirect URIs**: `https://<your-project-ref>.supabase.co/auth/v1/callback`
+5. Click Create — copy the **Client ID** and **Client Secret**.
+
+**Supabase dashboard:**
+1. **Authentication → Providers → Google** → enable it, paste in the Client ID and Client Secret → Save.
+2. **Authentication → URL Configuration** → add `http://localhost:5173` and your Vercel URL to **Redirect URLs**.
+
+No code changes needed after that — the button starts working as soon as both sides are configured.
+
 ## Notes on how the data model works
 
 - There's no separate "balance" field — your current balance is simply the sum of all transactions (income adds, expense subtracts). Set your starting point once via **Profile → Set Opening Balance**, which is stored as a normal transaction dated whenever you started tracking.
