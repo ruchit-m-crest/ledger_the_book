@@ -1,0 +1,116 @@
+import { useEffect, useState, useCallback } from 'react';
+import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { fetchTransactions } from './lib/transactions';
+import Auth from './components/Auth';
+import Dashboard from './components/Dashboard';
+import History from './components/History';
+import Insights from './components/Insights';
+import Profile from './components/Profile';
+import AddSheet from './components/AddSheet';
+import TabBar from './components/TabBar';
+import { CheckIcon } from './components/Icons';
+
+export default function App() {
+  const [session, setSession] = useState(undefined); // undefined = loading, null = signed out
+  const [tab, setTab] = useState('home');
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTxns, setLoadingTxns] = useState(true);
+  const [sheet, setSheet] = useState(null); // null | { editing: txn|null }
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const refresh = useCallback(async () => {
+    if (!session) return;
+    setLoadingTxns(true);
+    try {
+      const data = await fetchTransactions();
+      setTransactions(data);
+    } finally {
+      setLoadingTxns(false);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (session) refresh();
+  }, [session, refresh]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(''), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="centered-screen">
+        <div className="auth-card">
+          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 10 }}>Setup needed</div>
+          <div style={{ fontSize: 15, color: 'var(--label-2)', lineHeight: 1.5 }}>
+            This app isn't connected to a database yet. Add <code>VITE_SUPABASE_URL</code> and{' '}
+            <code>VITE_SUPABASE_ANON_KEY</code> to your environment variables (see <code>.env.example</code> and the
+            README), then reload.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (session === undefined) {
+    return (
+      <div className="centered-screen">
+        <div className="spinner" />
+      </div>
+    );
+  }
+
+  if (!session) return <Auth />;
+
+  return (
+    <div className="app-frame">
+      <div className="blob" style={{ width: 220, height: 220, bottom: 20, left: -60, background: 'oklch(80% 0.06 255)', opacity: 0.5 }} />
+      <div className="blob" style={{ width: 200, height: 200, bottom: -40, right: -60, background: 'oklch(82% 0.05 25)', opacity: 0.4 }} />
+
+      {toast && (
+        <div className="toast">
+          <CheckIcon />
+          {toast}
+        </div>
+      )}
+
+      {loadingTxns && transactions.length === 0 ? (
+        <div className="centered-screen">
+          <div className="spinner" />
+        </div>
+      ) : (
+        <>
+          {tab === 'home' && <Dashboard transactions={transactions} onSeeAll={() => setTab('history')} />}
+          {tab === 'history' && (
+            <History transactions={transactions} refresh={refresh} onEdit={(t) => setSheet({ editing: t })} />
+          )}
+          {tab === 'insights' && <Insights transactions={transactions} />}
+          {tab === 'profile' && <Profile user={session.user} transactions={transactions} refresh={refresh} />}
+        </>
+      )}
+
+      <TabBar current={tab} onNavigate={setTab} onAdd={() => setSheet({ editing: null })} />
+
+      {sheet && (
+        <AddSheet
+          editing={sheet.editing}
+          onClose={() => setSheet(null)}
+          onAdded={async () => {
+            setSheet(null);
+            setToast(sheet.editing ? 'Transaction updated' : 'Transaction added');
+            await refresh();
+          }}
+        />
+      )}
+    </div>
+  );
+}
