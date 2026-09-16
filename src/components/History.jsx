@@ -72,7 +72,7 @@ export default function History({ transactions, refresh, onEdit }) {
               key={f.id}
               className="chip"
               onClick={() => setFilterCategory(f.id)}
-              style={{ background: active ? 'var(--blue)' : 'var(--seg-track)', color: active ? '#fff' : 'var(--label)' }}
+              style={{ background: active ? 'var(--blue)' : 'rgba(120,120,135,0.14)', color: active ? '#fff' : 'var(--label)' }}
             >
               {f.label}
             </button>
