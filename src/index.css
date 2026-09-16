@@ -134,13 +134,11 @@ a {
   transition: box-shadow 0.2s ease;
 }
 
-/* Segmented control: track + animated sliding pill, both rendered as glass */
+/* Segmented control: track + animated sliding pill */
 .segmented {
   position: relative;
   display: flex;
-  background: rgba(120, 120, 135, 0.14);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  background: var(--seg-track);
   border-radius: 9px;
   padding: 2px;
 }
@@ -150,10 +148,8 @@ a {
   bottom: 2px;
   left: 2px;
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(8px) saturate(180%);
-  -webkit-backdrop-filter: blur(8px) saturate(180%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.16);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
   transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   filter: url(#liquid-lens);
 }
@@ -275,27 +271,20 @@ a {
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  row-gap: 8px;
-  justify-items: center;
 }
 .keypad button {
-  position: relative;
-  width: 56px;
   height: 56px;
   border: none;
+  background: none;
   font-size: 22px;
   font-weight: 400;
   color: var(--label);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 3px rgba(0, 0, 0, 0.08);
-  filter: url(#liquid-lens);
+  border-radius: 14px;
   transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.12s ease;
 }
 .keypad button:active {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--seg-track);
+  filter: url(#liquid-lens);
 }
 
 .cat-row {
@@ -360,8 +349,6 @@ a {
   border: none;
   font-size: 13px;
   font-weight: 600;
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
 }
 .chip:active {
   filter: url(#liquid-lens);
@@ -402,7 +389,6 @@ a {
 }
 
 .primary-btn {
-  position: relative;
   width: 100%;
   margin-top: 18px;
   height: 50px;
@@ -412,16 +398,6 @@ a {
   color: #fff;
   font-size: 15.5px;
   font-weight: 700;
-  overflow: hidden;
-  isolation: isolate;
-}
-/* Permanent glass sheen — pure CSS, renders even where the SVG filter doesn't */
-.primary-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 45%);
-  pointer-events: none;
 }
 .primary-btn:active:not(:disabled) {
   filter: url(#liquid-lens);
@@ -442,13 +418,10 @@ a {
 }
 
 .google-btn {
-  position: relative;
   width: 100%;
   height: 50px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  background: #fff;
   border: 1px solid var(--sep);
   display: flex;
   align-items: center;
@@ -457,15 +430,6 @@ a {
   font-size: 15px;
   font-weight: 600;
   color: var(--label);
-  overflow: hidden;
-  isolation: isolate;
-}
-.google-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%);
-  pointer-events: none;
 }
 
 .divider {
