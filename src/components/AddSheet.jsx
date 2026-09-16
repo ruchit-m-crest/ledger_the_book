@@ -106,13 +106,7 @@ export default function AddSheet({ onClose, onAdded, editing }) {
               const active = category === id;
               return (
                 <button key={id} className={`cat-item ${active ? 'active' : ''}`} onClick={() => setCategory(id)}>
-                  <div
-                    className="tile"
-                    style={{
-                      boxShadow: active ? '0 0 0 2.5px oklch(58% 0.21 259 / 0.4)' : 'none',
-                      filter: active ? 'url(#liquid-lens)' : 'none',
-                    }}
-                  >
+                  <div className="tile" style={{ boxShadow: active ? '0 0 0 2.5px oklch(58% 0.21 259 / 0.4)' : 'none' }}>
                     {meta.letter}
                   </div>
                   <span className="label">{meta.short}</span>

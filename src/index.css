@@ -43,12 +43,11 @@ input {
 
 button {
   cursor: pointer;
-  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.12s ease;
+  transition: transform 0.12s ease, opacity 0.12s ease;
 }
 button:active {
-  /* asymmetric squish (wider, flatter) reads as a liquid press rather than a flat scale-down */
-  transform: scale(1.04, 0.94);
-  opacity: 0.85;
+  transform: scale(0.96);
+  opacity: 0.8;
 }
 button:disabled {
   cursor: default;
@@ -151,7 +150,6 @@ a {
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
   transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  filter: url(#liquid-lens);
 }
 .segmented button {
   position: relative;
@@ -204,9 +202,6 @@ a {
 }
 .tab.active {
   color: var(--blue);
-}
-.tab:active {
-  filter: url(#liquid-lens);
 }
 .tab.active span {
   font-weight: 600;
@@ -279,12 +274,6 @@ a {
   font-size: 22px;
   font-weight: 400;
   color: var(--label);
-  border-radius: 14px;
-  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.12s ease;
-}
-.keypad button:active {
-  background: var(--seg-track);
-  filter: url(#liquid-lens);
 }
 
 .cat-row {
@@ -350,9 +339,6 @@ a {
   font-size: 13px;
   font-weight: 600;
 }
-.chip:active {
-  filter: url(#liquid-lens);
-}
 
 .spinner {
   width: 22px;
@@ -398,13 +384,6 @@ a {
   color: #fff;
   font-size: 15.5px;
   font-weight: 700;
-}
-.primary-btn:active:not(:disabled) {
-  filter: url(#liquid-lens);
-}
-
-.google-btn:active {
-  filter: url(#liquid-lens);
 }
 
 .link-btn {
