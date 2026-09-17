@@ -17,6 +17,7 @@ export default function App() {
   const [loadingTxns, setLoadingTxns] = useState(true);
   const [sheet, setSheet] = useState(null); // null | { editing: txn|null }
   const [toast, setToast] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -31,6 +32,9 @@ export default function App() {
     try {
       const data = await fetchTransactions();
       setTransactions(data);
+      setLoadError('');
+    } catch (e) {
+      setLoadError(e.message || 'Could not load your data. Check your connection and try again.');
     } finally {
       setLoadingTxns(false);
     }
@@ -83,7 +87,17 @@ export default function App() {
         </div>
       )}
 
-      {loadingTxns && transactions.length === 0 ? (
+      {loadError && transactions.length === 0 ? (
+        <div className="centered-screen">
+          <div className="auth-card" style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>Couldn't load your data</div>
+            <div style={{ fontSize: 14, color: 'var(--label-2)', marginBottom: 16, lineHeight: 1.5 }}>{loadError}</div>
+            <button className="primary-btn" style={{ marginTop: 0 }} onClick={refresh}>
+              Try Again
+            </button>
+          </div>
+        </div>
+      ) : loadingTxns && transactions.length === 0 ? (
         <div className="centered-screen">
           <div className="spinner" />
         </div>
@@ -91,7 +105,12 @@ export default function App() {
         <>
           {tab === 'home' && <Dashboard transactions={transactions} onSeeAll={() => setTab('history')} />}
           {tab === 'history' && (
-            <History transactions={transactions} refresh={refresh} onEdit={(t) => setSheet({ editing: t })} />
+            <History
+              transactions={transactions}
+              refresh={refresh}
+              onEdit={(t) => setSheet({ editing: t })}
+              onToast={setToast}
+            />
           )}
           {tab === 'insights' && <Insights transactions={transactions} />}
           {tab === 'profile' && <Profile user={session.user} transactions={transactions} refresh={refresh} />}

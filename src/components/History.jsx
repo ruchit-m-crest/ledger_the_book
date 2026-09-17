@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Segmented from './Segmented';
 import { SearchIcon } from './Icons';
 import { categoryMeta, PICKABLE_CATEGORIES } from '../lib/categories';
@@ -6,7 +6,7 @@ import { buildGroups, dayLabel, formatINR, deleteTransaction } from '../lib/tran
 
 const FILTERS = [{ id: 'all', label: 'All' }, ...PICKABLE_CATEGORIES.map((id) => ({ id, label: categoryMeta(id).label }))];
 
-export default function History({ transactions, refresh, onEdit }) {
+export default function History({ transactions, refresh, onEdit, onToast }) {
   const [groupBy, setGroupBy] = useState('week');
   const [filterCategory, setFilterCategory] = useState('all');
   const [query, setQuery] = useState('');
@@ -25,15 +25,29 @@ export default function History({ transactions, refresh, onEdit }) {
 
   const groups = useMemo(() => buildGroups(filtered, groupBy), [filtered, groupBy]);
 
+  // Close any swiped-open row when the list itself changes shape underneath it,
+  // otherwise a row can stay stuck open pointing at content that scrolled away.
+  useEffect(() => {
+    setSwipedId(null);
+  }, [groupBy, filterCategory, query]);
+
   async function handleDelete(id) {
     setSwipedId(null);
     setDeletingId(id);
     try {
       await deleteTransaction(id);
-      refresh();
+      await refresh();
+      onToast?.('Transaction deleted');
+    } catch (e) {
+      onToast?.(e.message || 'Could not delete transaction.');
     } finally {
       setDeletingId(null);
     }
+  }
+
+  function handleEdit(t) {
+    setSwipedId(null);
+    onEdit(t);
   }
 
   return (
@@ -50,8 +64,30 @@ export default function History({ transactions, refresh, onEdit }) {
           onChange={(e) => setQuery(e.target.value)}
           type="text"
           placeholder="Search"
-          style={{ paddingLeft: 34 }}
+          style={{ paddingLeft: 34, paddingRight: query ? 34 : 12 }}
         />
+        {query && (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => setQuery('')}
+            style={{
+              position: 'absolute',
+              right: 6,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 28,
+              height: 28,
+              border: 'none',
+              background: 'none',
+              color: 'var(--label-3)',
+              fontSize: 16,
+              lineHeight: 1,
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <Segmented
@@ -102,7 +138,7 @@ export default function History({ transactions, refresh, onEdit }) {
                   <div key={t.id} style={{ position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 140, display: 'flex' }}>
                       <button
-                        onClick={() => onEdit(t)}
+                        onClick={() => handleEdit(t)}
                         style={{ flex: 1, border: 'none', background: 'var(--seg-track)', color: 'var(--label)', fontSize: 13, fontWeight: 600 }}
                       >
                         Edit

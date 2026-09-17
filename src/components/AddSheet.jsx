@@ -23,6 +23,8 @@ export default function AddSheet({ onClose, onAdded, editing }) {
     setAmount((a) => {
       if (k === 'back') return a.length > 1 ? a.slice(0, -1) : '0';
       if (k === '.') return a.includes('.') ? a : a + '.';
+      const dotIndex = a.indexOf('.');
+      if (dotIndex !== -1 && a.length - dotIndex > 2) return a; // max 2 decimal places
       return a === '0' ? k : a.length < 9 ? a + k : a;
     });
   }
@@ -31,9 +33,10 @@ export default function AddSheet({ onClose, onAdded, editing }) {
     if (!canSubmit) return;
     setSaving(true);
     setError('');
+    const effectiveCategory = txType === 'income' ? 'other' : category;
     const payload = {
-      name: note.trim() !== '' ? note.trim() : categoryMeta(category).label,
-      category,
+      name: note.trim() !== '' ? note.trim() : categoryMeta(effectiveCategory).label,
+      category: effectiveCategory,
       amount: parsedAmount,
       isExpense: txType === 'expense',
       occurredOn: date,
@@ -50,15 +53,28 @@ export default function AddSheet({ onClose, onAdded, editing }) {
     }
   }
 
-  const amountDisplay = isNaN(parsedAmount) ? amount : parsedAmount.toLocaleString('en-IN');
+  // Format the integer part with thousands separators while typing, but keep the
+  // decimal part exactly as entered (a naive toLocaleString on the parsed float
+  // would silently drop a trailing "." or trailing zeros while the user types them).
+  const amountDisplay = (() => {
+    const dotIndex = amount.indexOf('.');
+    if (dotIndex === -1) {
+      const n = Number(amount);
+      return isNaN(n) ? amount : n.toLocaleString('en-IN');
+    }
+    const intPart = amount.slice(0, dotIndex);
+    const decPart = amount.slice(dotIndex + 1);
+    const n = Number(intPart || '0');
+    return `${isNaN(n) ? intPart : n.toLocaleString('en-IN')}.${decPart}`;
+  })();
 
   return (
     <>
-      <div className="scrim" onClick={onClose} />
+      <div className="scrim" onClick={saving ? undefined : onClose} />
       <div className="sheet">
         <div className="sheet-grab" />
         <div className="sheet-nav">
-          <button className="cancel" onClick={onClose}>
+          <button className="cancel" onClick={onClose} disabled={saving} style={saving ? { opacity: 0.5 } : undefined}>
             Cancel
           </button>
           <span className="title">{editing ? 'Edit Transaction' : 'New Transaction'}</span>
@@ -97,23 +113,27 @@ export default function AddSheet({ onClose, onAdded, editing }) {
             ))}
           </div>
 
-          <div className="sec-label" style={{ marginTop: 20 }}>
-            Category
-          </div>
-          <div className="cat-row">
-            {PICKABLE_CATEGORIES.map((id) => {
-              const meta = categoryMeta(id);
-              const active = category === id;
-              return (
-                <button key={id} className={`cat-item ${active ? 'active' : ''}`} onClick={() => setCategory(id)}>
-                  <div className="tile" style={{ boxShadow: active ? '0 0 0 2.5px oklch(58% 0.21 259 / 0.4)' : 'none' }}>
-                    {meta.letter}
-                  </div>
-                  <span className="label">{meta.short}</span>
-                </button>
-              );
-            })}
-          </div>
+          {txType === 'expense' && (
+            <>
+              <div className="sec-label" style={{ marginTop: 20 }}>
+                Category
+              </div>
+              <div className="cat-row">
+                {PICKABLE_CATEGORIES.map((id) => {
+                  const meta = categoryMeta(id);
+                  const active = category === id;
+                  return (
+                    <button key={id} className={`cat-item ${active ? 'active' : ''}`} onClick={() => setCategory(id)}>
+                      <div className="tile" style={{ boxShadow: active ? '0 0 0 2.5px oklch(58% 0.21 259 / 0.4)' : 'none' }}>
+                        {meta.letter}
+                      </div>
+                      <span className="label">{meta.short}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
 
           <div className="card" style={{ marginTop: 18 }}>
             <div className="row">
@@ -126,16 +146,17 @@ export default function AddSheet({ onClose, onAdded, editing }) {
                 style={{ border: 'none', outline: 'none', background: 'none', fontSize: 16, color: 'var(--label-2)', fontFamily: 'inherit' }}
               />
             </div>
-            <div
+            <button
+              type="button"
               className="row"
               onClick={() => setRecurring((r) => (r === 'none' ? 'weekly' : r === 'weekly' ? 'monthly' : 'none'))}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', width: '100%', border: 'none', background: 'none', textAlign: 'left', font: 'inherit', color: 'inherit' }}
             >
               <span style={{ flex: 1, fontSize: 16 }}>Repeat</span>
               <span style={{ fontSize: 16, color: 'var(--label-2)' }}>
                 {recurring === 'none' ? 'None' : recurring === 'weekly' ? 'Weekly' : 'Monthly'} ›
               </span>
-            </div>
+            </button>
             <div className="row">
               <input
                 value={note}

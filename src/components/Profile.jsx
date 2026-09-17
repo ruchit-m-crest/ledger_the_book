@@ -77,10 +77,21 @@ export default function Profile({ user, transactions, refresh }) {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
-            <input className="text-field" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <input
+              className="text-field"
+              type="date"
+              value={date}
+              max={toDateInputValue(new Date())}
+              onChange={(e) => setDate(e.target.value)}
+            />
             {error && <div className="error-text">{error}</div>}
             <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-              <button className="primary-btn" style={{ marginTop: 0, background: 'var(--seg-track)', color: 'var(--label)' }} onClick={() => setEditing(false)}>
+              <button
+                className="primary-btn"
+                style={{ marginTop: 0, background: 'var(--seg-track)', color: 'var(--label)' }}
+                onClick={() => setEditing(false)}
+                disabled={saving}
+              >
                 Cancel
               </button>
               <button className="primary-btn" style={{ marginTop: 0 }} onClick={handleSave} disabled={saving}>
