@@ -58,6 +58,13 @@ export default function Auth() {
   return (
     <div className="centered-screen">
       <div className="auth-card">
+        <img
+          src="/icon-192.png"
+          width="56"
+          height="56"
+          alt=""
+          style={{ borderRadius: 16, marginBottom: 14, display: 'block' }}
+        />
         <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>Ledger</div>
         <div style={{ fontSize: 15, color: 'var(--label-2)', marginBottom: 20 }}>
           {mode === 'signin' ? 'Sign in to your tracker' : 'Create your account'}
