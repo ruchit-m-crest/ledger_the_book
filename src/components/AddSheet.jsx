@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Segmented from './Segmented';
 import { getPickableCategories, categoryMeta } from '../lib/categories';
 import { insertTransaction, updateTransaction, toDateInputValue } from '../lib/transactions';
@@ -20,6 +20,13 @@ export default function AddSheet({ onClose, onAdded, editing, budgets = [], pres
   const [budgetId, setBudgetId] = useState(editing ? editing.budgetId : presetBudgetId || null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Hide the floating tab bar while this sheet is open — otherwise a short sheet's
+  // translucent background can let it show through underneath.
+  useEffect(() => {
+    document.body.classList.add('sheet-open');
+    return () => document.body.classList.remove('sheet-open');
+  }, []);
 
   const parsedAmount = parseFloat(amount);
   const canSubmit = !!parsedAmount && parsedAmount > 0 && !saving;

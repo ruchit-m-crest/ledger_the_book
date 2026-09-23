@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { insertBudget, updateBudget } from '../lib/budgets';
 
 const PRESET_COLORS = ['#3062d6', '#1f9e6b', '#c93f8c', '#c9720f', '#d64545', '#6b7280', '#7c3aed', '#0891b2'];
@@ -10,6 +10,13 @@ export default function BudgetSheet({ onClose, onSaved, editing }) {
   const [color, setColor] = useState(editing?.color || PRESET_COLORS[0]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  // Hide the floating tab bar while this sheet is open — otherwise its translucent
+  // background can let the tab bar show through underneath, since this sheet is short.
+  useEffect(() => {
+    document.body.classList.add('sheet-open');
+    return () => document.body.classList.remove('sheet-open');
+  }, []);
 
   const parsedAmount = parseFloat(amount);
   const canSubmit = name.trim() !== '' && !!parsedAmount && parsedAmount > 0 && !saving;

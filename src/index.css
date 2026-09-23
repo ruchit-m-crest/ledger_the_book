@@ -187,6 +187,13 @@ a {
    glassmorphism navigation bar" demo: detached from the screen edge,
    near-transparent tint, all-around border, and a lifted drop shadow
    rather than a flat edge-to-edge bar. */
+/* A sheet's translucent background can let the floating tab bar show through
+   underneath it, especially a short sheet; hide the tab bar entirely while any
+   sheet is open (AddSheet/BudgetSheet toggle this via a body class on mount). */
+body.sheet-open .tabbar {
+  display: none;
+}
+
 .tabbar {
   position: fixed;
   left: 50%;
