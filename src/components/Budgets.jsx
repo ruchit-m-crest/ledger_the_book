@@ -177,9 +177,7 @@ export default function Budgets({ budgets, transactions, refreshBudgets, refresh
 
       {rows.length === 0 ? (
         <div className="card" style={{ padding: 20, textAlign: 'center' }}>
-          <div style={{ fontSize: 15, color: 'var(--label-2)', lineHeight: 1.5 }}>
-            Set aside a fixed amount for something you're saving toward, like "Clothes" or "Trip", then log purchases against it.
-          </div>
+          <div style={{ fontSize: 14.5, color: 'var(--label-3)' }}>No budgets yet.</div>
           <button className="primary-btn" onClick={() => setSheet({ editing: null })}>
             + New Budget
           </button>

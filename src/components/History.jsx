@@ -103,7 +103,7 @@ export default function History({ transactions, refresh, onEdit, onToast }) {
         onChange={setGroupBy}
       />
 
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginTop: 12, paddingBottom: 2 }}>
+      <div className="chip-row" style={{ marginTop: 12 }}>
         {FILTERS.map((f) => {
           const active = filterCategory === f.id;
           return (

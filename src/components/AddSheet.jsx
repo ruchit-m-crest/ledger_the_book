@@ -147,7 +147,7 @@ export default function AddSheet({ onClose, onAdded, editing, budgets = [], pres
                   <div className="sec-label" style={{ marginTop: 20 }}>
                     Budget (optional)
                   </div>
-                  <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+                  <div className="chip-row">
                     <button
                       className="chip"
                       onClick={() => setBudgetId(null)}
