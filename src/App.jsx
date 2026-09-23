@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 import { fetchTransactions } from './lib/transactions';
+import { fetchBudgets } from './lib/budgets';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import History from './components/History';
 import Insights from './components/Insights';
 import Profile from './components/Profile';
+import Budgets from './components/Budgets';
 import AddSheet from './components/AddSheet';
 import TabBar from './components/TabBar';
 import { CheckIcon } from './components/Icons';
@@ -15,7 +17,8 @@ export default function App() {
   const [tab, setTab] = useState('home');
   const [transactions, setTransactions] = useState([]);
   const [loadingTxns, setLoadingTxns] = useState(true);
-  const [sheet, setSheet] = useState(null); // null | { editing: txn|null }
+  const [budgets, setBudgets] = useState([]);
+  const [sheet, setSheet] = useState(null); // null | { editing: txn|null, presetBudgetId?: string }
   const [toast, setToast] = useState('');
   const [loadError, setLoadError] = useState('');
 
@@ -40,9 +43,21 @@ export default function App() {
     }
   }, [session]);
 
+  const refreshBudgets = useCallback(async () => {
+    if (!session) return;
+    try {
+      setBudgets(await fetchBudgets());
+    } catch {
+      // Budgets are a secondary feature — a failed fetch shouldn't block the rest of the app.
+    }
+  }, [session]);
+
   useEffect(() => {
-    if (session) refresh();
-  }, [session, refresh]);
+    if (session) {
+      refresh();
+      refreshBudgets();
+    }
+  }, [session, refresh, refreshBudgets]);
 
   useEffect(() => {
     if (!toast) return;
@@ -103,7 +118,14 @@ export default function App() {
         </div>
       ) : (
         <>
-          {tab === 'home' && <Dashboard transactions={transactions} onSeeAll={() => setTab('history')} />}
+          {tab === 'home' && (
+            <Dashboard
+              transactions={transactions}
+              budgets={budgets}
+              onSeeAll={() => setTab('history')}
+              onSeeAllBudgets={() => setTab('budgets')}
+            />
+          )}
           {tab === 'history' && (
             <History
               transactions={transactions}
@@ -113,6 +135,17 @@ export default function App() {
             />
           )}
           {tab === 'insights' && <Insights transactions={transactions} />}
+          {tab === 'budgets' && (
+            <Budgets
+              budgets={budgets}
+              transactions={transactions}
+              refreshBudgets={refreshBudgets}
+              refresh={refresh}
+              onEditTransaction={(t) => setSheet({ editing: t })}
+              onAddExpense={(budgetId) => setSheet({ editing: null, presetBudgetId: budgetId })}
+              onToast={setToast}
+            />
+          )}
           {tab === 'profile' && <Profile user={session.user} transactions={transactions} refresh={refresh} />}
         </>
       )}
@@ -122,6 +155,8 @@ export default function App() {
       {sheet && (
         <AddSheet
           editing={sheet.editing}
+          budgets={budgets}
+          presetBudgetId={sheet.presetBudgetId}
           onClose={() => setSheet(null)}
           onAdded={async () => {
             setSheet(null);

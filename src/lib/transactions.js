@@ -12,7 +12,7 @@ export async function fetchTransactions() {
   return data.map(rowToTxn);
 }
 
-export async function insertTransaction({ name, category, amount, isExpense, occurredOn, recurring, note }) {
+export async function insertTransaction({ name, category, amount, isExpense, occurredOn, recurring, note, budgetId }) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -27,6 +27,7 @@ export async function insertTransaction({ name, category, amount, isExpense, occ
       occurred_on: occurredOn,
       recurring: recurring || 'none',
       note: note || null,
+      budget_id: budgetId || null,
     })
     .select()
     .single();
@@ -34,7 +35,7 @@ export async function insertTransaction({ name, category, amount, isExpense, occ
   return rowToTxn(data);
 }
 
-export async function updateTransaction(id, { name, category, amount, isExpense, occurredOn, recurring, note }) {
+export async function updateTransaction(id, { name, category, amount, isExpense, occurredOn, recurring, note, budgetId }) {
   const { data, error } = await supabase
     .from('transactions')
     .update({
@@ -45,6 +46,7 @@ export async function updateTransaction(id, { name, category, amount, isExpense,
       occurred_on: occurredOn,
       recurring: recurring || 'none',
       note: note || null,
+      budget_id: budgetId || null,
     })
     .eq('id', id)
     .select()
@@ -88,6 +90,7 @@ function rowToTxn(row) {
     date: new Date(row.occurred_on + 'T00:00:00'),
     recurring: row.recurring,
     note: row.note,
+    budgetId: row.budget_id,
   };
 }
 

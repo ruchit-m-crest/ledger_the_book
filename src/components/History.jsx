@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import Segmented from './Segmented';
 import { SearchIcon } from './Icons';
+import TransactionRow from './TransactionRow';
 import { categoryMeta, getPickableCategories } from '../lib/categories';
-import { buildGroups, dayLabel, formatINR, deleteTransaction } from '../lib/transactions';
+import { buildGroups, formatINR, deleteTransaction } from '../lib/transactions';
 
 export default function History({ transactions, refresh, onEdit, onToast }) {
   const FILTERS = useMemo(
@@ -133,55 +134,18 @@ export default function History({ transactions, refresh, onEdit, onToast }) {
               </span>
             </div>
             <div className="card">
-              {g.items.map((t, i) => {
-                const meta = categoryMeta(t.category);
-                const isLast = i === g.items.length - 1;
-                return (
-                  <div key={t.id} style={{ position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 140, display: 'flex' }}>
-                      <button
-                        onClick={() => handleEdit(t)}
-                        style={{ flex: 1, border: 'none', background: 'var(--seg-track)', color: 'var(--label)', fontSize: 13, fontWeight: 600 }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(t.id)}
-                        disabled={deletingId === t.id}
-                        style={{ flex: 1, border: 'none', background: 'var(--red)', color: '#fff', fontSize: 13, fontWeight: 600 }}
-                      >
-                        {deletingId === t.id ? '…' : 'Delete'}
-                      </button>
-                    </div>
-                    <div
-                      onClick={() => setSwipedId((s) => (s === t.id ? null : t.id))}
-                      style={{
-                        position: 'relative',
-                        transform: `translateX(${swipedId === t.id ? '-140px' : '0'})`,
-                        transition: 'transform 0.32s cubic-bezier(0.22,1,0.36,1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        background: 'var(--card)',
-                        padding: '11px 16px',
-                        borderBottom: isLast ? 'none' : '0.5px solid var(--sep)',
-                      }}
-                    >
-                      <div className="tile" style={{ background: meta.color }}>{meta.letter}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 15.5 }}>{t.name}</div>
-                        <div style={{ fontSize: 13, color: 'var(--label-3)', marginTop: 1 }}>{dayLabel(t.date)}</div>
-                      </div>
-                      <div
-                        className="num"
-                        style={{ fontSize: 15.5, fontWeight: 500, color: t.isExpense ? 'var(--red)' : 'var(--green)', flexShrink: 0 }}
-                      >
-                        {t.isExpense ? '–' : '+'}₹{formatINR(t.amount)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {g.items.map((t, i) => (
+                <TransactionRow
+                  key={t.id}
+                  t={t}
+                  isLast={i === g.items.length - 1}
+                  swiped={swipedId === t.id}
+                  deleting={deletingId === t.id}
+                  onToggleSwipe={(id) => setSwipedId((s) => (s === id ? null : id))}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
             </div>
           </div>
         ))}

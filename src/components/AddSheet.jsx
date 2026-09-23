@@ -6,7 +6,8 @@ import { insertTransaction, updateTransaction, toDateInputValue } from '../lib/t
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'back'];
 
 // Pass `editing` (a transaction object) to edit an existing entry instead of creating a new one.
-export default function AddSheet({ onClose, onAdded, editing }) {
+// Pass `presetBudgetId` to start pre-linked to a budget (e.g. "+ Add Expense" from inside a budget).
+export default function AddSheet({ onClose, onAdded, editing, budgets = [], presetBudgetId }) {
   const pickableCategories = getPickableCategories();
   const [amount, setAmount] = useState(editing ? String(editing.amount) : '0');
   const [txType, setTxType] = useState(editing ? (editing.isExpense ? 'expense' : 'income') : 'expense');
@@ -16,6 +17,7 @@ export default function AddSheet({ onClose, onAdded, editing }) {
   const [date, setDate] = useState(editing ? toDateInputValue(editing.date) : toDateInputValue(new Date()));
   const [recurring, setRecurring] = useState(editing ? editing.recurring : 'none');
   const [note, setNote] = useState(editing?.note || '');
+  const [budgetId, setBudgetId] = useState(editing ? editing.budgetId : presetBudgetId || null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,6 +47,7 @@ export default function AddSheet({ onClose, onAdded, editing }) {
       occurredOn: date,
       recurring,
       note: note.trim() || null,
+      budgetId: txType === 'expense' ? budgetId : null,
     };
     try {
       if (editing) await updateTransaction(editing.id, payload);
@@ -138,6 +141,36 @@ export default function AddSheet({ onClose, onAdded, editing }) {
                   );
                 })}
               </div>
+
+              {budgets.length > 0 && (
+                <>
+                  <div className="sec-label" style={{ marginTop: 20 }}>
+                    Budget (optional)
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+                    <button
+                      className="chip"
+                      onClick={() => setBudgetId(null)}
+                      style={{ background: !budgetId ? 'var(--blue)' : 'var(--seg-track)', color: !budgetId ? '#fff' : 'var(--label)' }}
+                    >
+                      None
+                    </button>
+                    {budgets.map((b) => {
+                      const active = budgetId === b.id;
+                      return (
+                        <button
+                          key={b.id}
+                          className="chip"
+                          onClick={() => setBudgetId(b.id)}
+                          style={{ background: active ? b.color : 'var(--seg-track)', color: active ? '#fff' : 'var(--label)' }}
+                        >
+                          {b.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </>
           )}
 
