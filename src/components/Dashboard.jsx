@@ -78,7 +78,7 @@ export default function Dashboard({ transactions, onSeeAll }) {
           const meta = categoryMeta(t.category);
           return (
             <div className="row" key={t.id}>
-              <div className="tile">{meta.letter}</div>
+              <div className="tile" style={{ background: meta.color }}>{meta.letter}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15.5, fontWeight: 400 }}>{t.name}</div>
                 <div style={{ fontSize: 13, color: 'var(--label-3)', marginTop: 1 }}>{dayLabel(t.date)}</div>

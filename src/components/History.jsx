@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import Segmented from './Segmented';
 import { SearchIcon } from './Icons';
-import { categoryMeta, PICKABLE_CATEGORIES } from '../lib/categories';
+import { categoryMeta, getPickableCategories } from '../lib/categories';
 import { buildGroups, dayLabel, formatINR, deleteTransaction } from '../lib/transactions';
 
-const FILTERS = [{ id: 'all', label: 'All' }, ...PICKABLE_CATEGORIES.map((id) => ({ id, label: categoryMeta(id).label }))];
-
 export default function History({ transactions, refresh, onEdit, onToast }) {
+  const FILTERS = useMemo(
+    () => [{ id: 'all', label: 'All' }, ...getPickableCategories().map((id) => ({ id, label: categoryMeta(id).label }))],
+    []
+  );
   const [groupBy, setGroupBy] = useState('week');
   const [filterCategory, setFilterCategory] = useState('all');
   const [query, setQuery] = useState('');
@@ -165,7 +167,7 @@ export default function History({ transactions, refresh, onEdit, onToast }) {
                         borderBottom: isLast ? 'none' : '0.5px solid var(--sep)',
                       }}
                     >
-                      <div className="tile">{meta.letter}</div>
+                      <div className="tile" style={{ background: meta.color }}>{meta.letter}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 15.5 }}>{t.name}</div>
                         <div style={{ fontSize: 13, color: 'var(--label-3)', marginTop: 1 }}>{dayLabel(t.date)}</div>

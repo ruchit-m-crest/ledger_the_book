@@ -134,7 +134,7 @@ export default function Insights({ transactions }) {
                       width: 22,
                       height: 22,
                       borderRadius: 6,
-                      background: 'var(--tile)',
+                      background: c.meta.color,
                       color: '#fff',
                       fontSize: 11,
                       fontWeight: 700,
@@ -156,7 +156,7 @@ export default function Insights({ transactions }) {
                   style={{
                     height: '100%',
                     width: `${c.pct}%`,
-                    background: 'var(--tile)',
+                    background: c.meta.color,
                     transition: 'width 0.35s cubic-bezier(0.22,1,0.36,1)',
                   }}
                 />
@@ -174,7 +174,7 @@ export default function Insights({ transactions }) {
           const due = nextDue(transactions, r.id, r.interval);
           return (
             <div className="row" key={r.id}>
-              <div className="tile">{categoryMeta(r.id).letter}</div>
+              <div className="tile" style={{ background: categoryMeta(r.id).color }}>{categoryMeta(r.id).letter}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15.5 }}>{r.label}</div>
                 <div style={{ fontSize: 13, color: 'var(--label-3)', marginTop: 1 }}>{r.cadenceLabel}</div>

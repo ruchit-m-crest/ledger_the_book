@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import Segmented from './Segmented';
-import { PICKABLE_CATEGORIES, categoryMeta } from '../lib/categories';
+import { getPickableCategories, categoryMeta } from '../lib/categories';
 import { insertTransaction, updateTransaction, toDateInputValue } from '../lib/transactions';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'back'];
 
 // Pass `editing` (a transaction object) to edit an existing entry instead of creating a new one.
 export default function AddSheet({ onClose, onAdded, editing }) {
+  const pickableCategories = getPickableCategories();
   const [amount, setAmount] = useState(editing ? String(editing.amount) : '0');
   const [txType, setTxType] = useState(editing ? (editing.isExpense ? 'expense' : 'income') : 'expense');
-  const [category, setCategory] = useState(editing ? editing.category : 'shopping');
+  const [category, setCategory] = useState(
+    editing ? editing.category : pickableCategories.includes('shopping') ? 'shopping' : pickableCategories[0]
+  );
   const [date, setDate] = useState(editing ? toDateInputValue(editing.date) : toDateInputValue(new Date()));
   const [recurring, setRecurring] = useState(editing ? editing.recurring : 'none');
   const [note, setNote] = useState(editing?.note || '');
@@ -119,12 +122,15 @@ export default function AddSheet({ onClose, onAdded, editing }) {
                 Category
               </div>
               <div className="cat-row">
-                {PICKABLE_CATEGORIES.map((id) => {
+                {pickableCategories.map((id) => {
                   const meta = categoryMeta(id);
                   const active = category === id;
                   return (
                     <button key={id} className={`cat-item ${active ? 'active' : ''}`} onClick={() => setCategory(id)}>
-                      <div className="tile" style={{ boxShadow: active ? '0 0 0 2.5px oklch(58% 0.21 259 / 0.4)' : 'none' }}>
+                      <div
+                        className="tile"
+                        style={{ background: meta.color, boxShadow: active ? '0 0 0 2.5px oklch(58% 0.21 259 / 0.4)' : 'none' }}
+                      >
                         {meta.letter}
                       </div>
                       <span className="label">{meta.short}</span>

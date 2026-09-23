@@ -93,6 +93,28 @@ export function GoogleIcon() {
   );
 }
 
+export function ChevronLeftIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M12.5 4.5L6.5 10l6 5.5" stroke="var(--blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function TrashIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+      <path
+        d="M4.5 6h11M8 6V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V6m-6.5 0 .6 9.6a1.5 1.5 0 0 0 1.5 1.4h4.8a1.5 1.5 0 0 0 1.5-1.4L15.5 6"
+        stroke="var(--red)"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function CheckIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 20 20" fill="none">

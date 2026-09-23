@@ -320,7 +320,11 @@ a {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  /* overflow-x:auto forces the browser to clip the y-axis too, which was cropping the
+     active tile's ring (box-shadow); pad the row for it and cancel the padding with a
+     matching negative margin so the row's own layout position doesn't shift. */
+  padding: 4px 2px 4px;
+  margin: -4px -2px 0;
 }
 .cat-item {
   flex-shrink: 0;
@@ -339,6 +343,37 @@ a {
 }
 .cat-item.active .label {
   color: var(--label);
+}
+
+.color-swatch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--sep);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.color-swatch input[type='color'] {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+.color-swatch input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-swatch input[type='color']::-webkit-color-swatch {
+  border: none;
+}
+.color-swatch input[type='color']::-moz-color-swatch {
+  border: none;
 }
 
 .toast {

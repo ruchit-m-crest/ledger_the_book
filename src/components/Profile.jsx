@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { findOpeningBalance, setOpeningBalance, toDateInputValue, formatINR } from '../lib/transactions';
+import CategorySettings from './CategorySettings';
 
 export default function Profile({ user, transactions, refresh }) {
   const existing = findOpeningBalance(transactions);
@@ -9,6 +10,9 @@ export default function Profile({ user, transactions, refresh }) {
   const [date, setDate] = useState(existing ? toDateInputValue(existing.date) : toDateInputValue(new Date()));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showCategories, setShowCategories] = useState(false);
+
+  if (showCategories) return <CategorySettings onBack={() => setShowCategories(false)} />;
 
   async function handleSave() {
     const parsed = parseFloat(amount);
@@ -39,6 +43,21 @@ export default function Profile({ user, transactions, refresh }) {
           <span style={{ flex: 1, fontSize: 16 }}>Signed in as</span>
           <span style={{ fontSize: 15, color: 'var(--label-2)' }}>{user.email}</span>
         </div>
+      </div>
+
+      <div className="sec-label" style={{ marginTop: 20 }}>
+        Categories
+      </div>
+      <div className="card">
+        <button
+          type="button"
+          className="row"
+          onClick={() => setShowCategories(true)}
+          style={{ cursor: 'pointer', width: '100%', border: 'none', background: 'none', textAlign: 'left', font: 'inherit', color: 'inherit' }}
+        >
+          <span style={{ flex: 1, fontSize: 16 }}>Colours & categories</span>
+          <span style={{ fontSize: 16, color: 'var(--label-2)' }}>›</span>
+        </button>
       </div>
 
       <div className="sec-label" style={{ marginTop: 20 }}>
