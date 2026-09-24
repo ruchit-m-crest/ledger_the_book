@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { findOpeningBalance, setOpeningBalance, toDateInputValue, formatINR } from '../lib/transactions';
+import { getTheme, setTheme } from '../lib/theme';
 import CategorySettings from './CategorySettings';
+import Segmented from './Segmented';
 
 export default function Profile({ user, transactions, refresh }) {
   const existing = findOpeningBalance(transactions);
@@ -11,6 +13,12 @@ export default function Profile({ user, transactions, refresh }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [showCategories, setShowCategories] = useState(false);
+  const [theme, setThemeState] = useState(getTheme);
+
+  function changeTheme(next) {
+    setTheme(next);
+    setThemeState(next);
+  }
 
   if (showCategories) return <CategorySettings onBack={() => setShowCategories(false)} />;
 
@@ -44,6 +52,18 @@ export default function Profile({ user, transactions, refresh }) {
           <span style={{ fontSize: 15, color: 'var(--label-2)' }}>{user.email}</span>
         </div>
       </div>
+
+      <div className="sec-label" style={{ marginTop: 20 }}>
+        Appearance
+      </div>
+      <Segmented
+        options={[
+          { id: 'light', label: 'Light' },
+          { id: 'dark', label: 'Dark' },
+        ]}
+        value={theme}
+        onChange={changeTheme}
+      />
 
       <div className="sec-label" style={{ marginTop: 20 }}>
         Categories
@@ -123,7 +143,7 @@ export default function Profile({ user, transactions, refresh }) {
 
       <button
         className="primary-btn"
-        style={{ marginTop: 28, background: 'var(--red)' }}
+        style={{ marginTop: 28, background: 'var(--red)', color: '#fff' }}
         onClick={() => supabase.auth.signOut()}
       >
         Sign Out

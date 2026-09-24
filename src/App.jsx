@@ -92,8 +92,8 @@ export default function App() {
 
   return (
     <div className="app-frame">
-      <div className="blob" style={{ width: 220, height: 220, bottom: 20, left: -60, background: 'oklch(80% 0.06 255)', opacity: 0.5 }} />
-      <div className="blob" style={{ width: 200, height: 200, bottom: -40, right: -60, background: 'oklch(82% 0.05 25)', opacity: 0.4 }} />
+      <div className="blob" style={{ width: 220, height: 220, bottom: 20, left: -60, background: 'var(--blob-1)', opacity: 0.5 }} />
+      <div className="blob" style={{ width: 200, height: 200, bottom: -40, right: -60, background: 'var(--blob-2)', opacity: 0.4 }} />
 
       {toast && (
         <div className="toast">
