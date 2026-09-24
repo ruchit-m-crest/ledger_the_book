@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Segmented from './Segmented';
 import { insertBudget, updateBudget } from '../lib/budgets';
 
 const PRESET_COLORS = ['#3062d6', '#1f9e6b', '#c93f8c', '#c9720f', '#d64545', '#6b7280', '#7c3aed', '#0891b2'];
@@ -8,6 +9,7 @@ export default function BudgetSheet({ onClose, onSaved, editing }) {
   const [name, setName] = useState(editing?.name || '');
   const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
   const [color, setColor] = useState(editing?.color || PRESET_COLORS[0]);
+  const [affectsBalance, setAffectsBalance] = useState(editing ? editing.affectsBalance : true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -25,7 +27,7 @@ export default function BudgetSheet({ onClose, onSaved, editing }) {
     if (!canSubmit) return;
     setSaving(true);
     setError('');
-    const payload = { name: name.trim(), amount: parsedAmount, color };
+    const payload = { name: name.trim(), amount: parsedAmount, color, affectsBalance };
     try {
       if (editing) await updateBudget(editing.id, payload);
       else await insertBudget(payload);
@@ -98,6 +100,18 @@ export default function BudgetSheet({ onClose, onSaved, editing }) {
                 <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
               </label>
             </div>
+
+            <div className="sec-label" style={{ marginTop: 16 }}>
+              Affects Balance
+            </div>
+            <Segmented
+              options={[
+                { id: 'yes', label: 'Yes' },
+                { id: 'no', label: 'No' },
+              ]}
+              value={affectsBalance ? 'yes' : 'no'}
+              onChange={(v) => setAffectsBalance(v === 'yes')}
+            />
           </div>
 
           {error && <div className="error-text">{error}</div>}

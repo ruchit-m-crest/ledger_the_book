@@ -3,9 +3,10 @@ import Segmented from './Segmented';
 import { SearchIcon } from './Icons';
 import TransactionRow from './TransactionRow';
 import { categoryMeta, getPickableCategories } from '../lib/categories';
+import { excludeSeparateBudgets } from '../lib/budgets';
 import { buildGroups, formatINR, deleteTransaction } from '../lib/transactions';
 
-export default function History({ transactions, refresh, onEdit, onToast }) {
+export default function History({ transactions, budgets, refresh, onEdit, onToast }) {
   const FILTERS = useMemo(
     () => [{ id: 'all', label: 'All' }, ...getPickableCategories().map((id) => ({ id, label: categoryMeta(id).label }))],
     []
@@ -16,14 +17,18 @@ export default function History({ transactions, refresh, onEdit, onToast }) {
   const [swipedId, setSwipedId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // Transactions linked to a budget marked "tracked separately" only appear inside
+  // that budget's own entry list, not here in the main history.
+  const visible = useMemo(() => excludeSeparateBudgets(transactions, budgets), [transactions, budgets]);
+
   const filtered = useMemo(
     () =>
-      transactions.filter(
+      visible.filter(
         (t) =>
           (filterCategory === 'all' || t.category === filterCategory) &&
           (query.trim() === '' || t.name.toLowerCase().includes(query.trim().toLowerCase()))
       ),
-    [transactions, filterCategory, query]
+    [visible, filterCategory, query]
   );
 
   const groups = useMemo(() => buildGroups(filtered, groupBy), [filtered, groupBy]);

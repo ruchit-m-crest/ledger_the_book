@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Segmented from './Segmented';
 import { categoryMeta } from '../lib/categories';
+import { excludeSeparateBudgets } from '../lib/budgets';
 import { formatINR, nextDue } from '../lib/transactions';
 
 function monthBounds(offsetMonths) {
@@ -13,19 +14,23 @@ function monthBounds(offsetMonths) {
   return { year: first.getFullYear(), month: first.getMonth(), daysInMonth, lastDayShown };
 }
 
-export default function Insights({ transactions }) {
+export default function Insights({ transactions, budgets }) {
   const [range, setRange] = useState('this');
   const offset = range === 'this' ? 0 : -1;
   const bounds = monthBounds(offset);
   const lastBounds = monthBounds(offset - 1);
 
+  // Transactions linked to a budget marked "tracked separately" don't count toward
+  // these totals — they still count against their own budget, just not here.
+  const balanceTxns = useMemo(() => excludeSeparateBudgets(transactions, budgets), [transactions, budgets]);
+
   const inMonth = useMemo(
-    () => transactions.filter((t) => t.isExpense && t.date.getFullYear() === bounds.year && t.date.getMonth() === bounds.month),
-    [transactions, bounds]
+    () => balanceTxns.filter((t) => t.isExpense && t.date.getFullYear() === bounds.year && t.date.getMonth() === bounds.month),
+    [balanceTxns, bounds]
   );
   const inPrevMonth = useMemo(
-    () => transactions.filter((t) => t.isExpense && t.date.getFullYear() === lastBounds.year && t.date.getMonth() === lastBounds.month),
-    [transactions, lastBounds]
+    () => balanceTxns.filter((t) => t.isExpense && t.date.getFullYear() === lastBounds.year && t.date.getMonth() === lastBounds.month),
+    [balanceTxns, lastBounds]
   );
 
   const total = inMonth.reduce((s, t) => s + t.amount, 0);

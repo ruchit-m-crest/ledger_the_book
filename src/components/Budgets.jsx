@@ -116,7 +116,9 @@ export default function Budgets({ budgets, transactions, refreshBudgets, refresh
           <div style={{ marginTop: 14 }}>
             <BudgetBar pct={pct} over={remaining < 0} />
           </div>
-          <div style={{ fontSize: 13, color: 'var(--label-3)', marginTop: 10 }}>₹{formatINR(spent)} spent</div>
+          <div style={{ fontSize: 13, color: 'var(--label-3)', marginTop: 10 }}>
+            ₹{formatINR(spent)} spent{!selected.affectsBalance && ' · tracked separately'}
+          </div>
         </div>
 
         <button className="primary-btn" style={{ marginTop: 16 }} onClick={() => onAddExpense(selected.id)}>

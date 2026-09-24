@@ -1,11 +1,14 @@
 import { categoryMeta } from '../lib/categories';
-import { computeBudgetSpent } from '../lib/budgets';
+import { computeBudgetSpent, excludeSeparateBudgets } from '../lib/budgets';
 import { computeBalance, computeWeekSpent, computeMonthSpent, nextDue, formatINR, dayLabel } from '../lib/transactions';
 
 export default function Dashboard({ transactions, budgets, onSeeAll, onSeeAllBudgets }) {
-  const balance = computeBalance(transactions);
-  const weekSpent = computeWeekSpent(transactions);
-  const monthSpent = computeMonthSpent(transactions);
+  // Transactions linked to a budget marked "tracked separately" don't count toward
+  // these app-wide totals — they still count against their own budget, just not here.
+  const balanceTxns = excludeSeparateBudgets(transactions, budgets);
+  const balance = computeBalance(balanceTxns);
+  const weekSpent = computeWeekSpent(balanceTxns);
+  const monthSpent = computeMonthSpent(balanceTxns);
   const weeklyDue = nextDue(transactions, 'weekly', 'weekly');
   const sipDue = nextDue(transactions, 'sip', 'monthly');
 
@@ -16,7 +19,9 @@ export default function Dashboard({ transactions, budgets, onSeeAll, onSeeAllBud
   ].filter(Boolean);
   const soonest = candidates.sort((a, b) => a.days - b.days)[0];
 
-  const recent = transactions.slice(0, 6);
+  // Same visibility rule as balance/spend: a "tracked separately" budget's entries
+  // only show inside that budget, not in the app-wide Recent Activity list.
+  const recent = balanceTxns.slice(0, 6);
 
   return (
     <div className="screen">

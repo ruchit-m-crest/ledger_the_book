@@ -129,12 +129,13 @@ export default function App() {
           {tab === 'history' && (
             <History
               transactions={transactions}
+              budgets={budgets}
               refresh={refresh}
               onEdit={(t) => setSheet({ editing: t })}
               onToast={setToast}
             />
           )}
-          {tab === 'insights' && <Insights transactions={transactions} />}
+          {tab === 'insights' && <Insights transactions={transactions} budgets={budgets} />}
           {tab === 'budgets' && (
             <Budgets
               budgets={budgets}

@@ -38,8 +38,14 @@ create table if not exists public.budgets (
   name text not null,
   amount numeric not null check (amount > 0),
   color text not null default '#3062d6',
+  -- Whether this budget's linked transactions also count toward the app-wide
+  -- balance/spend totals (true), or are tracked only within the budget itself (false).
+  affects_balance boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+alter table public.budgets
+  add column if not exists affects_balance boolean not null default true;
 
 alter table public.budgets enable row level security;
 

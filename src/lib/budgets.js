@@ -8,21 +8,26 @@ export async function fetchBudgets() {
   return data.map(rowToBudget);
 }
 
-export async function insertBudget({ name, amount, color }) {
+export async function insertBudget({ name, amount, color, affectsBalance = true }) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from('budgets')
-    .insert({ user_id: user.id, name, amount, color })
+    .insert({ user_id: user.id, name, amount, color, affects_balance: affectsBalance })
     .select()
     .single();
   if (error) throw error;
   return rowToBudget(data);
 }
 
-export async function updateBudget(id, { name, amount, color }) {
-  const { data, error } = await supabase.from('budgets').update({ name, amount, color }).eq('id', id).select().single();
+export async function updateBudget(id, { name, amount, color, affectsBalance = true }) {
+  const { data, error } = await supabase
+    .from('budgets')
+    .update({ name, amount, color, affects_balance: affectsBalance })
+    .eq('id', id)
+    .select()
+    .single();
   if (error) throw error;
   return rowToBudget(data);
 }
@@ -38,6 +43,7 @@ function rowToBudget(row) {
     name: row.name,
     amount: Number(row.amount),
     color: row.color,
+    affectsBalance: row.affects_balance !== false,
     createdAt: new Date(row.created_at),
   };
 }
@@ -56,4 +62,12 @@ export function computeBudgetSpent(transactions, budgetId) {
 
 export function computeBudgetRemaining(budget, transactions) {
   return budget.amount - computeBudgetSpent(transactions, budget.id);
+}
+
+// Drops transactions linked to a budget marked "tracked separately" (affectsBalance:
+// false) — they still count against that budget's own remaining amount, but shouldn't
+// double up in the app-wide balance/spend totals. Used wherever those totals are computed.
+export function excludeSeparateBudgets(transactions, budgets) {
+  const separateIds = new Set(budgets.filter((b) => !b.affectsBalance).map((b) => b.id));
+  return transactions.filter((t) => !t.budgetId || !separateIds.has(t.budgetId));
 }
