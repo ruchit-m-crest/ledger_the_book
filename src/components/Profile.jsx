@@ -3,9 +3,10 @@ import { supabase } from '../supabaseClient';
 import { findOpeningBalance, setOpeningBalance, toDateInputValue, formatINR } from '../lib/transactions';
 import { getTheme, setTheme } from '../lib/theme';
 import CategorySettings from './CategorySettings';
+import Statement from './Statement';
 import Segmented from './Segmented';
 
-export default function Profile({ user, transactions, refresh }) {
+export default function Profile({ user, transactions, budgets, refresh }) {
   const existing = findOpeningBalance(transactions);
   const [editing, setEditing] = useState(false);
   const [amount, setAmount] = useState(existing ? String(existing.amount) : '');
@@ -13,6 +14,7 @@ export default function Profile({ user, transactions, refresh }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [showCategories, setShowCategories] = useState(false);
+  const [showStatement, setShowStatement] = useState(false);
   const [theme, setThemeState] = useState(getTheme);
 
   function changeTheme(next) {
@@ -21,6 +23,8 @@ export default function Profile({ user, transactions, refresh }) {
   }
 
   if (showCategories) return <CategorySettings onBack={() => setShowCategories(false)} />;
+  if (showStatement)
+    return <Statement user={user} transactions={transactions} budgets={budgets} onBack={() => setShowStatement(false)} />;
 
   async function handleSave() {
     const parsed = parseFloat(amount);
@@ -76,6 +80,21 @@ export default function Profile({ user, transactions, refresh }) {
           style={{ cursor: 'pointer', width: '100%', border: 'none', background: 'none', textAlign: 'left', font: 'inherit', color: 'inherit' }}
         >
           <span style={{ flex: 1, fontSize: 16 }}>Colours & categories</span>
+          <span style={{ fontSize: 16, color: 'var(--label-2)' }}>›</span>
+        </button>
+      </div>
+
+      <div className="sec-label" style={{ marginTop: 20 }}>
+        Statements
+      </div>
+      <div className="card">
+        <button
+          type="button"
+          className="row"
+          onClick={() => setShowStatement(true)}
+          style={{ cursor: 'pointer', width: '100%', border: 'none', background: 'none', textAlign: 'left', font: 'inherit', color: 'inherit' }}
+        >
+          <span style={{ flex: 1, fontSize: 16 }}>Download PDF statement</span>
           <span style={{ fontSize: 16, color: 'var(--label-2)' }}>›</span>
         </button>
       </div>

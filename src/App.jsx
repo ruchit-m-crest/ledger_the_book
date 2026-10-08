@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { withAuthRetry } from './lib/authRetry';
 import { fetchTransactions } from './lib/transactions';
 import { fetchBudgets } from './lib/budgets';
 import Auth from './components/Auth';
@@ -29,35 +30,55 @@ export default function App() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Key data loads on the user, not the session object — the session object changes on
+  // every token refresh, which used to re-fire loads that raced the earlier (failed) ones.
+  const userId = session?.user?.id;
+  const txnReq = useRef(0);
+  const budgetReq = useRef(0);
+
   const refresh = useCallback(async () => {
-    if (!session) return;
+    if (!userId) return;
+    const req = ++txnReq.current;
     setLoadingTxns(true);
     try {
-      const data = await fetchTransactions();
+      const data = await withAuthRetry(fetchTransactions);
+      if (req !== txnReq.current) return; // a newer load superseded this one
       setTransactions(data);
       setLoadError('');
     } catch (e) {
+      if (req !== txnReq.current) return;
       setLoadError(e.message || 'Could not load your data. Check your connection and try again.');
     } finally {
-      setLoadingTxns(false);
+      if (req === txnReq.current) setLoadingTxns(false);
     }
-  }, [session]);
+  }, [userId]);
 
   const refreshBudgets = useCallback(async () => {
-    if (!session) return;
+    if (!userId) return;
+    const req = ++budgetReq.current;
     try {
-      setBudgets(await fetchBudgets());
+      const data = await withAuthRetry(fetchBudgets);
+      if (req === budgetReq.current) setBudgets(data);
     } catch {
       // Budgets are a secondary feature — a failed fetch shouldn't block the rest of the app.
+      // Keep whatever we had; the next foreground/refresh will try again.
     }
-  }, [session]);
+  }, [userId]);
 
   useEffect(() => {
-    if (session) {
-      refresh();
-      refreshBudgets();
-    }
-  }, [session, refresh, refreshBudgets]);
+    if (!userId) return;
+    refresh();
+    refreshBudgets();
+    // Reload when the app returns to the foreground (PWA resumed from background).
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        refresh();
+        refreshBudgets();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [userId, refresh, refreshBudgets]);
 
   useEffect(() => {
     if (!toast) return;
@@ -147,7 +168,7 @@ export default function App() {
               onToast={setToast}
             />
           )}
-          {tab === 'profile' && <Profile user={session.user} transactions={transactions} refresh={refresh} />}
+          {tab === 'profile' && <Profile user={session.user} transactions={transactions} budgets={budgets} refresh={refresh} />}
         </>
       )}
 
